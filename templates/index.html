@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Emotion Recognition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{url_for('static', filename='logo.png')}}" type="image/icon type">
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(30, 30, 45, 1) 0%, rgba(10, 10, 20, 1) 100%);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #e0e0e0;
+            transition: background 0.4s ease;
+            padding: 0 20px; /* Added padding for small screens */
+        }
+
+        img {
+            max-width: 100%; /* Ensure the image scales to the width of its container */
+            height: 150px; /* Maintain aspect ratio */
+            margin-bottom: 10px; /* Space between image and heading */
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #4a90e2;
+            transition: color 0.4s ease;
+            cursor: default;
+        }
+
+        p {
+            font-size: 1.2em;
+            text-align: center;
+            margin: 0 0 30px;
+            color: #4a90e2; /* Make the text blue */
+            cursor: pointer; /* Indicate clickability */
+        }
+        p.desc {
+            font-size: 1.2em;
+            text-align: center;
+            margin: 0 0 30px;
+            color: #fff; /* Make the text blue */
+            cursor: default; /* Indicate clickability */
+        }
+
+        .upload-container {
+            background: rgba(30, 30, 40, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .upload-btn {
+            background-color: #4a90e2;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 15px 35px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #3d7ab6;
+            transform: scale(1.05);
+        }
+
+        .upload-area {
+            border: 2px dashed #4a90e2;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+
+        .upload-area:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        input[type="file"] {
+            display: none; /* Hide the default file input */
+        }
+
+        #fileFeedback {
+            display: none;
+            color: #4a90e2;
+            margin-top: 15px;
+        }
+
+        .loading {
+            display: none;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #a3c4e0;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin: 10px auto;
+            background-color: #ff0000;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            font-size: 17px;
+            transition: visibility 0s, opacity 0.5s linear;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 2em; /* Smaller title for small screens */
+            }
+
+            p {
+                font-size: 1em; /* Smaller paragraph text */
+            }
+
+            .upload-container {
+                padding: 15px; /* Reduce padding on small screens */
+            }
+
+            .upload-btn {
+                padding: 10px 20px; /* Smaller button padding */
+                font-size: 0.9em; /* Smaller button text */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .upload-container {
+                max-width: 90%; /* Allow more width on larger devices */
+            }
+
+            .upload-area {
+                padding: 20px; /* Smaller padding in upload area */
+            }
+        }
+    </style>
+    <script>
+        function updateUploadStatus(event) {
+            const feedback = document.getElementById('fileFeedback');
+            const loading = document.getElementById('loadingMessage');
+
+            if (event.target.files.length > 0) {
+                feedback.textContent = "File selected: " + event.target.files[0].name;
+                feedback.style.display = "block";
+                loading.style.display = "none";
+            } else {
+                feedback.style.display = "none";
+                loading.style.display = "none";
+            }
+        }
+
+        function showLoading() {
+            const loading = document.getElementById('loadingMessage');
+            loading.style.display = 'block';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = "show";
+            toast.style.visibility = 'visible';
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+                toast.style.visibility = 'hidden';
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('predictEmotionBtn').addEventListener('click', (event) => {
+                const fileInput = document.getElementById('file');
+                if (fileInput.files.length === 0) {
+                    event.preventDefault(); // Prevent form submission
+                    showToast('Please upload a file first!'); // Show toast message
+                } else {
+                    showLoading(); // Handle the actual prediction logic here
+                }
+            });
+
+            // Enable drag and drop functionality
+            const uploadArea = document.querySelector('.upload-area');
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = 'rgba(74, 144, 226, 0.2)';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.backgroundColor = '';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                const fileInput = document.getElementById('file');
+                fileInput.files = files; // Simulate the file input change
+                updateUploadStatus({ target: fileInput }); // Update feedback
+                uploadArea.style.backgroundColor = ''; // Reset style
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <img src="{{url_for('static', filename='logo.png')}}" align="middle" />
+    <!-- <img src="your-image-url.jpg" alt="Speech Emotion Recognition" /> Add your image URL here -->
+    <h1>Speech Emotion Recognition</h1>
+    <p class="desc">Upload an audio file to analyze the emotional content of speech.</p>
+    <div class="upload-container">
+        <form method="post" enctype="multipart/form-data" onsubmit="showLoading();">
+            <div class="upload-area">
+                <label for="file" class="upload-label">
+                    <p><br>Click to select or drag and drop your audio file here</p> <!-- Clickable text -->
+                </label>
+                <input type="file" name="file" accept="audio/*" id="file" required onchange="updateUploadStatus(event);">
+                <div id="fileFeedback"></div>
+                <div id="loadingMessage" class="loading">Loading... Please wait.</div>
+            </div>
+            <button class="upload-btn" type="submit" id="predictEmotionBtn">Predict Emotion</button>
+        </form>
+        <div id="toast"></div> <!-- Toast notification div -->
+    </div>
+</body>
+
+</html>

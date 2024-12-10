@@ -1,0 +1,96 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognized</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(30, 30, 45, 1) 0%, rgba(10, 10, 20, 1) 100%);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #e0e0e0; /* Light text color */
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #4a90e2; /* Blue accent color for the header */
+        }
+
+        img {
+            max-width: 100%; /* Ensure the image scales to the width of its container */
+            height: 150px; /* Maintain aspect ratio */
+            margin-bottom: 10px; /* Space between image and heading */
+        }
+
+        .result-container {
+            background: rgba(30, 30, 40, 0.9); /* Semi-transparent dark container */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-in; /* Fade-in effect */
+        }
+
+        audio {
+            margin-top: 20px;
+            width: 100%;
+            border-radius: 5px; /* Rounded corners for audio player */
+            background: rgba(30, 30, 40, 0.9);
+        }
+
+        .try-again-btn {
+            background: #4a90e2; /* Blue button color */
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .try-again-btn:hover {
+            background: #3d7ab6; /* Darker blue on hover */
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img src="{{url_for('static', filename='logo.png')}}" align="middle" />
+    <h1>Emotion Recognized: {{ emotion }}</h1>
+    <div class="result-container">
+        <audio controls>
+            <source src="{{ url_for('uploaded_file', filename=audio_filename) }}" type="audio/wav">
+            Your browser does not support the audio tag.
+        </audio>
+        <form method="get" action="/">
+            <button class="try-again-btn" type="submit">Try Again</button>
+        </form>
+    </div>
+</body>
+
+</html>
