@@ -1,29 +1,28 @@
-import keras
 import librosa
 import numpy as np
-from keras.layers import Input, Conv1D, Flatten, Dense, Dropout, Activation, MaxPooling1D
-from keras.models import Model
+import keras
+from keras import layers
+
 from flask import Flask, request, redirect, render_template_string, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 from io import BytesIO
 import base64
-import os
 
 ''' Class to Make Predicitions '''
 
 class LivePredictions:
     def __init__(self):
-        self.path = r"C://Users//kstar//Documents//Projects//Final Year Project//One More Trial//model//Emotion_Voice_Detection_Model.h5"
+        self.path = ".//model//Emotion_Voice_Detection_Model.h5"
 
-        input_layer = Input(shape=(40, 1))
-        x = Conv1D(64, 5, padding='same')(input_layer)
-        x = Activation('relu')(x)
-        x = Dropout(0.2)(x)
-        x = Flatten()(x)
-        x = Dense(8)(x)
-        output_layer = Activation('softmax')(x)
-        self.model = Model(inputs=input_layer, outputs=output_layer)
+        input_layer = keras.Input(shape=(40, 1))
+        x = layers.Conv1D(64, 5, padding='same')(input_layer)
+        x = layers.Activation('relu')(x)
+        x = layers.Dropout(0.2)(x)
+        x = layers.Flatten()(x)
+        x = layers.Dense(8)(x)
+        output_layer = layers.Activation('softmax')(x)
+        self.model = keras.Model(inputs=input_layer, outputs=output_layer)
         self.model.load_weights(self.path)
 
     @staticmethod
@@ -51,15 +50,3 @@ class LivePredictions:
         predicted_class = np.argmax(predictions)
 
         return self.convert_class_to_emotion(predicted_class)
-    
-if __name__ == "__main__":
-    pred = LivePredictions()
-    pred.model.summary()
-
-    # wrong_classification_path = '/content/03-01-01-01-01-02-05.wav'
-    correct_classification_path = 'C://Users//kstar//Documents//Projects//Final Year Project//One More Trial//examples//10-16-07-29-82-30-63.wav'
-
-    correct = pred.make_predictions(file=correct_classification_path)
-    print(f"Correct Emotion Is {correct}")
-    # wrong = predection.make_predictions(file=wrong_classification_path)
-    # print(f"Wrong Emotion Is {wrong}")
