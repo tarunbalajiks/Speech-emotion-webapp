@@ -1,4 +1,6 @@
 librosa
 keras
 flask
+gunicorn==19.7.1
+numpy
 
